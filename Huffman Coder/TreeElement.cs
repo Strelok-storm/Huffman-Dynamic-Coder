@@ -13,6 +13,8 @@ namespace Huffman_Coder
 		Byte? _symbol;
 		TreeElement _right;
 		TreeElement _left;
+		bool _isEOF;
+		bool _isESC;
 
 		public TreeElement Parent
 		{
@@ -48,13 +50,27 @@ namespace Huffman_Coder
 			set{ _left = value; }
 		}
 
-		public TreeElement(TreeElement parent, int weight, Byte? symbol, TreeElement left, TreeElement right)
+		public bool IsEOF
+		{
+			get{ return _isEOF; }
+			set{ _isEOF = value; }
+		}
+
+		public bool IsESC
+		{
+			get{ return _isESC; }
+			set{ _isESC = value; }
+		}
+
+		public TreeElement(TreeElement parent, int weight, Byte? symbol, TreeElement left, TreeElement right, bool isEof, bool isEsc)
 		{
 			Parent = parent;
 			Weight = weight;
 			Symbol = symbol;
 			Left = left;
 			Right = right;
+			IsEOF = isEof;
+			IsESC = isEsc;
 		}
 	}
 }
