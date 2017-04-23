@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
+using Microsoft.Win32;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -31,7 +33,7 @@ namespace Huffman_Coder
 		
 		private void InitTree()
 		{
-			tree.Add(new TreeElement(null, 0, "", null, null));
+			tree.Add(new TreeElement(null, 0, null, null, null));
 			tree.Add(new TreeElement(tree[0], 0, "ESC", null, null));
 			tree.Add(new TreeElement(tree[0], 0, "EOF", null, null));
 			tree[0].Left = tree[1];
@@ -95,9 +97,9 @@ namespace Huffman_Coder
 			tree[second].Symbol = k.Symbol;
 		}
 
-		private void AddNewSymbol(string symbol)
+		private void AddNewSymbol(Byte symbol)
 		{
-			tree.Insert(tree.Count - 3, new TreeElement(tree[tree.Count - 3].Parent, 0, "", tree[tree.Count - 3], null));//Установка левого элемена и родителя нового родителя
+			tree.Insert(tree.Count - 3, new TreeElement(tree[tree.Count - 3].Parent, 0, null, tree[tree.Count - 3], null));//Установка левого элемена и родителя нового родителя
 			tree.Insert(tree.Count - 3, new TreeElement(tree[tree.Count - 4], 1, symbol, null, null));//Полная устаовка нового символа
 			tree[tree.Count - 5].Right = tree[tree.Count - 4];//Правый элемент нового родителя
 			if(tree[tree.Count-5].Parent!=null)
@@ -106,26 +108,22 @@ namespace Huffman_Coder
 			ReBuildTree(tree.Count-5);
 		}
 
-		private bool SearchSymbol(string symbol)
+		private bool SearchSymbol(Byte symbol)
 		{
 			foreach(TreeElement e in tree)
 			{
-				if (e.Symbol.Equals(symbol))
+				if (e.Symbol==symbol)
 					return true;
 			}
 			return false;
 		}
 
-		private void Coder()
+		private void Coder(string filePath)
 		{
-			//string out1 = GetWayToSymbol("ESC");
-			//string out2 = GetWayToSymbol("EOF");
-			//Console.WriteLine(out1 + "    " + out2);
-			symbolString = inputFlow.Text;
-			while (symbolString.Count<char>() != 0)
+			BinaryReader inputFileReader = new BinaryReader(File.Open(filePath, FileMode.Open));
+			while (inputFileReader.PeekChar()>-1)//Пока в файле есть символы
 			{
-				string symbol = symbolString[0].ToString();
-				symbolString=symbolString.Remove(0, 1);
+				Byte symbol = inputFileReader.ReadByte();
 				if(SearchSymbol(symbol)==false)
 				{
 					//string exitCode = GetWayToSymbol("ESC");
@@ -161,12 +159,12 @@ namespace Huffman_Coder
 			}
 		}
 
-		private int GetSymbolIndex(string symbol)
+		private int GetSymbolIndex(Byte? symbol)
 		{
-			return tree.FindIndex((e) => e.Symbol.Equals(symbol));
+			return tree.FindIndex((e) => e.Symbol==symbol);
 		}
 
-		private void GetWayToSymbol(string symbol, ref string findedWay, TreeElement current)
+		private void GetWayToSymbol(Byte? symbol, ref string findedWay, TreeElement current)
 		{
 			string way="";
 			if(symbol.Equals(current.Symbol))
@@ -188,7 +186,19 @@ namespace Huffman_Coder
 
 		private void CoderClick(object sender, EventArgs e)
 		{
-			Coder();
+			string filePath = "";
+			OpenFileDialog fileDialog = new OpenFileDialog();
+			fileDialog.ShowDialog();
+			try
+			{
+				filePath = fileDialog.FileName;
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show("Невозможно прочитать файл!" + ex.Message);
+			}
+			Console.WriteLine(filePath);
+			Coder(filePath);
 		}
 	}
 }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Huffman_Coder
 {
-	class TreeElement:ICloneable
+	class TreeElement
 	{
 		TreeElement _parent;
 		int _weight;
-		string _symbol;
+		Byte? _symbol;
 		TreeElement _right;
 		TreeElement _left;
 
@@ -30,7 +30,7 @@ namespace Huffman_Coder
 			}
 		}
 
-		public string Symbol
+		public Byte? Symbol
 		{
 			get{ return _symbol; }
 			set{ _symbol = value; }
@@ -48,26 +48,13 @@ namespace Huffman_Coder
 			set{ _left = value; }
 		}
 
-		public TreeElement(TreeElement parent, int weight, string symbol, TreeElement left, TreeElement right)
+		public TreeElement(TreeElement parent, int weight, Byte? symbol, TreeElement left, TreeElement right)
 		{
 			Parent = parent;
 			Weight = weight;
 			Symbol = symbol;
 			Left = left;
 			Right = right;
-		}
-
-		public void SetValues(TreeElement target)
-		{
-			Weight = target.Weight;
-			Symbol = target.Symbol;
-			Left = target.Left;
-			Right = target.Right;
-		}
-
-		public object Clone()
-		{
-			return MemberwiseClone();
 		}
 	}
 }
