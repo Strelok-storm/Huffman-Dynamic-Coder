@@ -51,12 +51,12 @@ namespace Huffman_Coder
 				else
 				{
 					int i = currIndex;
-					while(tree[i].Weight>tree[i-1].Weight)
+					while(tree[currIndex].Weight>tree[i-1].Weight)
 					{
 						num = i - 1;
 						i--;
 					}
-					if(num!=0)
+					if (num!=0)
 					{
 						
 						Swap(currIndex, num);
