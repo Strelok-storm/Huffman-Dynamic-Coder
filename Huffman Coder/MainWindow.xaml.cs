@@ -24,6 +24,7 @@ namespace Huffman_Coder
 	{
 		List<TreeElement> tree;
 		List<char> outputString;
+		string currentNotFullString;
 		
 		public MainWindow()
 		{
@@ -126,59 +127,69 @@ namespace Huffman_Coder
 
 		private void Coder(string filePath)
 		{
-			BinaryReader inputFileReader = new BinaryReader(File.Open(filePath, FileMode.Open));
+			//BinaryReader inputFileReader = new BinaryReader(File.Open(filePath, FileMode.Open));
 			BinaryWriter outputFileWriter = new BinaryWriter(File.Open("code.package", FileMode.Create));
-			while (true)//Пока в файле есть символы
+			Byte[] file = File.ReadAllBytes(filePath);
+			int[,] BIT = new int[file.Length, 8];
+			int i = 0, j = 0;
+			foreach (byte b in file)
 			{
-				try
+				if (SearchSymbol(b) == false)
 				{
-					Byte symbol = inputFileReader.ReadByte();
-				
-				if(SearchSymbol(symbol)==false)
-				{
+					//Резерв какой-то строки,
 					string exitCode = "";
 					GetESCCode(ref exitCode, tree[0], "");
-					/*if(exitCode.Length>8)//Разбиение строки на частички по 8 бит
+					/*foreach (char c in exitCode)
 					{
-						
+						outputString.Add(c);
 					}
-					Byte b = Convert.ToByte(exitCode, 2);
-					outputFileWriter.Write(b);
-					outputFileWriter.Write(symbol);
-					outputFileWriter.Flush();*/
+					foreach (char c in Convert.ToString(b, 2))
+					{
+						outputString.Add(c);
+					}*/
 					foreach(char c in exitCode)
 					{
-							outputString.Add(c);
+						BIT[i, j] = Convert.ToInt16(c);
+						j++;
+						if(j%8==0)
+						{
+							j = 0;
+							i++;
+						}
 					}
-					//string symbolString = Convert.ToString(symbol, 2);
-					foreach(char c in Convert.ToString(symbol, 2))
+					for(int k=0;k<8;k++)
 					{
-							outputString.Add(c);
+						BIT[i, j] = (b >> k) & 0x01;
+						j++;
+						if (j % 8 == 0)
+						{
+							j = 0;
+							i++;
+						}
 					}
-					AddNewSymbol(symbol);
+					AddNewSymbol(b);
 				}
 				else
 				{
 					string exitCode = "";
-					GetWayToSymbol(symbol, ref exitCode, tree[0], "");
-					/*Byte b = Convert.ToByte(exitCode);
-					outputFileWriter.Write(b);
-					outputFileWriter.Flush();*/
-					foreach(char c in exitCode)
+					GetWayToSymbol(b, ref exitCode, tree[0], "");
+					foreach (char c in exitCode)
 					{
-						outputString.Add(c);
+						BIT[i, j] = Convert.ToInt16(c);
+						j++;
+						if (j % 8 == 0)
+						{
+							j = 0;
+							i++;
+						}
 					}
-					ReBuildTree(GetSymbolIndex(symbol));
-				}
-				}
-				catch (EndOfStreamException ex)
-				{
-					break;
+					ReBuildTree(GetSymbolIndex(b));
 				}
 			}
-			string output = "";
+			MessageBox.Show("Ok!");
+			//string output = "";
 			//ЗАписать по 8 бит в байты и писать их в файл.
-			for (int i=0; i<outputString.Count; i++)
+			/*for (int i=0; i<outputString.Count; i++)
 			{
 				output += outputString[i];
 				if(output.Length==8)
@@ -188,7 +199,7 @@ namespace Huffman_Coder
 					outputFileWriter.Flush();
 					output = "";
 				}
-			}
+			}*/
 		}
 
 		private int GetSymbolIndex(Byte? symbol)
@@ -206,13 +217,11 @@ namespace Huffman_Coder
 			}
 			if(current.Left!=null)
 			{
-				way += "0";
-				GetESCCode(ref way, current.Left, outputWay);
+				GetESCCode(ref way, current.Left, outputWay+"0");
 			}
 			if(current.Right!=null)
 			{
-				way += "1";
-				GetESCCode(ref way, current.Right, outputWay);
+				GetESCCode(ref way, current.Right, outputWay+"1");
 			}
 		}
 
@@ -225,13 +234,11 @@ namespace Huffman_Coder
 			}
 			if(current.Left!=null)
 			{
-				way += "0";
-				GetWayToSymbol(symbol, ref findedWay, current.Left, way);
+				GetWayToSymbol(symbol, ref findedWay, current.Left, way+"0");
 			}
 			if(current.Right!=null)
 			{
-				way += "1";
-				GetWayToSymbol(symbol, ref findedWay, current.Right, way);
+				GetWayToSymbol(symbol, ref findedWay, current.Right, way+"1");
 			}
 		}
 
