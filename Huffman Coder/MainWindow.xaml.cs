@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using Microsoft.Win32;
 using System.Windows.Controls;
@@ -129,61 +130,29 @@ namespace Huffman_Coder
 		{
 			//BinaryReader inputFileReader = new BinaryReader(File.Open(filePath, FileMode.Open));
 			BinaryWriter outputFileWriter = new BinaryWriter(File.Open("code.package", FileMode.Create));
-			Byte[] file = File.ReadAllBytes(filePath);
-			int[,] BIT = new int[file.Length, 8];
-			int i = 0, j = 0;
-			foreach (byte b in file)
+			BinaryReader inputFileReader = new BinaryReader(File.Open(filePath, FileMode.Open));
+			while(true)
 			{
-				if (SearchSymbol(b) == false)
+				try
 				{
-					//Резерв какой-то строки,
-					string exitCode = "";
-					GetESCCode(ref exitCode, tree[0], "");
-					/*foreach (char c in exitCode)
+					Byte b = inputFileReader.ReadByte();
+					if (SearchSymbol(b) == false)
 					{
-						outputString.Add(c);
+						//Резерв какой-то строки,
+						string exitCode = "";
+						GetESCCode(ref exitCode, tree[0], "");
+						AddNewSymbol(b);
 					}
-					foreach (char c in Convert.ToString(b, 2))
+					else
 					{
-						outputString.Add(c);
-					}*/
-					foreach(char c in exitCode)
-					{
-						BIT[i, j] = Convert.ToInt16(c);
-						j++;
-						if(j%8==0)
-						{
-							j = 0;
-							i++;
-						}
+						string exitCode = "";
+						GetWayToSymbol(b, ref exitCode, tree[0], "");
+						ReBuildTree(GetSymbolIndex(b));
 					}
-					for(int k=0;k<8;k++)
-					{
-						BIT[i, j] = (b >> k) & 0x01;
-						j++;
-						if (j % 8 == 0)
-						{
-							j = 0;
-							i++;
-						}
-					}
-					AddNewSymbol(b);
 				}
-				else
+				catch (EndOfStreamException ex)
 				{
-					string exitCode = "";
-					GetWayToSymbol(b, ref exitCode, tree[0], "");
-					foreach (char c in exitCode)
-					{
-						BIT[i, j] = Convert.ToInt16(c);
-						j++;
-						if (j % 8 == 0)
-						{
-							j = 0;
-							i++;
-						}
-					}
-					ReBuildTree(GetSymbolIndex(b));
+					break;
 				}
 			}
 			MessageBox.Show("Ok!");
